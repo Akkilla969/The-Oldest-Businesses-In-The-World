@@ -1,47 +1,24 @@
-CREATE TABLE categories (
-  category_code VARCHAR(5) PRIMARY KEY,
-  category VARCHAR(50)
-);
+-- 1. The oldest business in the world
 
-CREATE TABLE countries (
-  country_code CHAR(3) PRIMARY KEY,
-  country VARCHAR(50),
-  continent VARCHAR(20)
-);
-
-CREATE TABLE businesses (
-  business VARCHAR(64) PRIMARY KEY,
-  year_founded INT,
-  category_code VARCHAR(5),
-  country_code CHAR(3)
-);
-
-\copy categories FROM 'categories.csv' DELIMITER ',' CSV HEADER;
-\copy countries FROM 'countries.csv' DELIMITER ',' CSV HEADER;
-\copy businesses FROM 'businesses.csv' DELIMITER ',' CSV HEADER;
-
--- Select the oldest and newest founding years from the businesses table
 SELECT
     MIN(year_founded),
     MAX(year_founded)
 FROM businesses;
 
--- Get the count of rows in businesses where the founding year was before 1000
+-- 2. How many businesses were founded before 1000?
 
 SELECT COUNT (business)
 FROM businesses
 WHERE year_founded < 1000;
   
--- Select all columns from businesses where the founding year was before 1000
--- Arrange the results from oldest to newest
+-- 3. Which businesses were founded before 1000?
 
 SELECT *
 FROM businesses
 WHERE year_founded <1000
 ORDER BY year_founded;
 
--- Select business name, founding year, and country code from businesses; and category from categories
--- where the founding year was before 1000, arranged from oldest to newest
+-- 4. Exploring the categories where the founding year was before 1000 
 
 SELECT b.business, 
        b.year_founded, 
@@ -53,8 +30,7 @@ ON c.category_code = b.category_code
 WHERE b.year_founded < 1000
 ORDER BY b.year_founded;
 
--- Select the category and count of category (as "n")
--- arranged by descending count, limited to 10 most common categories
+-- 5. Counting the categories
 
 SELECT
     c.category,
@@ -65,9 +41,7 @@ GROUP BY c.category
 ORDER BY COUNT(1) DESC
 LIMIT 10;
 
--- Select the oldest founding year (as "oldest") from businesses, 
--- and continent from countries
--- for each continent, ordered from oldest to newest 
+-- 6. Oldest business by continent 
 
 SELECT MIN(b.year_founded) AS oldest,
        c.continent
@@ -77,7 +51,7 @@ ON c.country_code = b.country_code
 GROUP BY c.continent
 ORDER BY MIN(b.year_founded);
 
--- Select the business, founding year, category, country, and continent
+-- 7. Joining everything for further analysis 
 
 SELECT b.business, b.year_founded, 
        ca.category,
@@ -87,7 +61,7 @@ FROM businesses b
 JOIN countries co ON b.country_code = co.country_code
 JOIN categories ca ON b.category_code = ca.category_code;
 
--- Count the number of businesses in each continent and category
+-- 8. Counting categories by continent
 
 SELECT co.continent, ca.category,
        COUNT(business) AS n
@@ -96,7 +70,7 @@ JOIN categories ca ON b.category_code = ca.category_code
 JOIN countries co ON b.country_code = co.country_code
 GROUP BY co.continent, ca.category;
 
--- Repeat that previous query, filtering for results having a count greater than 5
+-- 9. Filtering counts by continent and category
 
 SELECT co.continent, ca.category,
        COUNT(business) AS n
